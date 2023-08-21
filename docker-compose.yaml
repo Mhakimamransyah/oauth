@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.1
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQLDB_HOST}
+      - MYSQL_DATABASE=${MYSQLDB_NAME}
+    networks:
+      - mynetwork
+    ports:
+      - ${MYSQLDB_PORT}:3306
+    volumes:
+      - ./dbdata:/var/lib/mysql
+      
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP_PORT=${APP_PORT}
+        - DB_HOST=${MYSQLDB_CONTAINER_HOST}
+    restart: on-failure
+    container_name: app
+    ports:
+      - ${APP_PORT}:8001
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+      
+
+  migrate:
+    image: migrate/migrate
+    container_name: migrations
+    networks:
+      - mynetwork
+    volumes:
+      - ./infrastructures/databases/mysql/migrations:/migrations
+    depends_on:
+      - db
+    command: ["-path", "/migrations","-database","mysql://${MYSQLDB_USERNAME}:${MYSQLDB_PASSWORD}@tcp(${MYSQLDB_CONTAINER_HOST}:${MYSQLDB_PORT})/${MYSQLDB_NAME}","up"]
+
+networks:
+  mynetwork:
+    driver: bridge
