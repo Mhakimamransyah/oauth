@@ -70,6 +70,15 @@ const routes = {
     "/web/login": {
         template: "/web/login.html",
         title: "Login Page",
+        callback : function() {
+            
+            const githubLogin = document.getElementById("github");
+            const googleLogin =document.getElementById("google");
+
+            githubLogin.setAttribute("href",githubLogin.getAttribute("href").replace("%s",githubClientId));
+            googleLogin.setAttribute("href",googleLogin.getAttribute("href").replace("%s",googleClientId));
+            
+        }
     },
     "/web/home": {
         template: "/web/home.html",

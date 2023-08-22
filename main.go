@@ -46,7 +46,10 @@ func main() {
 	app.Static("/web", "public/pages")
 
 	app.Get("/web/*", func(c *fiber.Ctx) error {
-		return c.SendFile("public/pages/index.html")
+		return c.Render("public/pages/index.html", fiber.Map{
+			"github_client_id": config.Config.GithubOauth.ClientId,
+			"google_client_id": config.Config.GoogleOauth.ClientId,
+		})
 	})
 
 	defer func() {
